@@ -1,0 +1,188 @@
+{"email_Id":"swamy@virtusa.com","Password":"swamy"},"ename":"Swamy","mobile":"8756492315","roleName":"teamlead","projectName":"reporting"}
+
+create procedure sp_getEmpId(@email nvarchar(150))
+as
+begin
+select EmployeeId from Employee where EmailId=@email
+end
+go
+
+create procedure sp_getEmpPassword(@email nvarchar(150))
+as
+begin
+select password from Employee where EmailId=@email
+end
+go
+
+create procedure sp_getProjectId(@projName nvarchar(50))
+as
+begin
+select ProjectId from Project where ProjectName=@projName
+end
+go
+
+create procedure sp_getEmployeeDetails(@email nvarchar(150))
+as
+begin
+select e.EmailId,e.EmployeeId,e.IsActive,e.mobile,e.Name,e.password,r.RoleId,r.RoleName,p.ProjectName,pa.ProjectId,e.AEEmailId
+from Employee e left join Role r on r.RoleId=e.RoleId left join ProjectAllocation pa on e.EmployeeId=pa.EmployeeId 
+left join Project p on p.ProjectId = pa.ProjectId where e.EmailId = @email
+end
+
+
+create procedure sp_getRoleId(@roleName nvarchar(50))
+as
+begin
+select RoleId from Role where RoleName=@roleName
+end
+go
+
+
+create procedure sp_Register(@name nvarchar(50),@mobile nvarchar(10),@password nvarchar(50),@email nvarchar(150),@IsActive int)
+as
+begin
+insert into Employee values(@name,@mobile,@password,@email,@IsActive)
+end
+go
+
+create procedure sp_InsertProjectAllocation(@projId int,@empIdId int,@roleId int)
+as
+begin
+insert into ProjectAllocation(ProjectId,EmployeeId) values(@projId,@empIdId,@roleId)
+end
+go
+
+create procedure sp_login(@email nvarchar(150))
+as
+begin
+select password,RoleId from Employee where EmailId=@email
+end
+
+
+create procedure sp_getActiveStatus(@empId int)
+as
+begin
+select IsActive from Employee where EmployeeId = @empId
+end
+go
+
+
+create procedure sp_updateActiveStatus(@empId int)
+as
+begin
+update Employee set IsActive='1' where EmployeeId=@empId
+end
+go
+
+create procedure sp_updateSelfDetails(@empId int,@name nvarchar(50),@mobile nvarchar(10),@password nvarchar(50))
+as
+begin
+update Employee set Name=@name,mobile=@mobile,password=@password where EmployeeId=@empId
+end
+go
+
+create procedure sp_getEmpDetails(@email nvarchar(150))
+as
+begin
+select EmployeeId,Name,mobile,RoleId,AEEmailId from Employee where EmailId=@email
+end
+
+create procedure sp_getAllocatedProjectId(@empId int)
+as
+begin
+select ProjectId from ProjectAllocation where EmployeeId=@empId
+end
+go
+
+create procedure sp_getEmployeeList
+as
+begin
+select e.EmailId,e.EmployeeId,e.IsActive,e.mobile,e.Name,e.password,r.RoleId,r.RoleName,p.ProjectName,pa.ProjectId
+from Employee e left join Role r on r.RoleId=e.RoleId left join ProjectAllocation pa on e.EmployeeId=pa.EmployeeId 
+left join Project p on p.ProjectId = pa.ProjectId
+end
+go
+
+create procedure sp_getTeamDetails(@roleId int,@projId int)
+as
+begin
+	if(@roleId = 3) 
+	select e.EmailId,e.EmployeeId,e.IsActive,e.mobile,e.Name,e.RoleId,r.RoleName,p.ProjectName,pa.ProjectId
+from Employee e left join Role r on e.RoleId=r.RoleId left join ProjectAllocation pa on e.EmployeeId=pa.EmployeeId 
+left join Project p on p.ProjectId = pa.ProjectId where e.roleId < @roleId order by pa.ProjectId
+	if(@roleId = 2)
+	select e.EmailId,e.EmployeeId,e.IsActive,e.mobile,e.Name,e.RoleId,r.RoleName,p.ProjectName,pa.ProjectId
+from Employee e left join Role r on e.RoleId=r.RoleId left join ProjectAllocation pa on e.EmployeeId=pa.EmployeeId 
+left join Project p on p.ProjectId = pa.ProjectId where e.roleId < @roleId AND pa.ProjectId = @projId  order by pa.ProjectId
+end
+go
+
+
+select e.EmailId,e.EmployeeId,e.IsActive,e.mobile,e.Name,e.password,e.RoleId,r.RoleName,p.ProjectName,pa.ProjectId
+from Employee e left join Role r on e.RoleId=r.RoleId left join ProjectAllocation pa on e.EmployeeId=pa.EmployeeId 
+left join Project p on p.ProjectId = pa.ProjectId where e.roleId < @roleId
+
+
+
+
+
+
+ProjTrackerMapper.ProjTrackerMapper.ProjTrackerMapper projMapper;
+        public ValuesController()
+        {
+            projMapper = new ProjTrackerMapper.ProjTrackerMapper.ProjTrackerMapper();
+        }
+
+        [HttpPost]
+        [Route("api/Values/ValidateLogin")]
+        public IHttpActionResult ValidateLogin([FromBody]ProjTracker.Models.Employee empObj)
+        {
+            var result = projMapper.validateLogin(empObj);
+            return Ok<Employee>(result);
+        }
+
+        [HttpPost]
+        [Route("api/Values/Register")]
+        public bool Register([FromBody]ProjTracker.Models.Employee empObj)
+        {
+            bool regStatus = projMapper.Register(empObj);
+            return regStatus;
+        }
+
+		
+		
+		this.client.get<font style="background-color: #4f81bd"><Travellers></font>(`${DATA_ACCESS_PREFIX}/traveller.json`)
+   .subscribe( (data) => {
+     data.travellers.map(traveller => console.log(`Hello ${traveller.lastName}, ${traveller.firstName}`));
+   });
+
+
+
+create procedure sp_updateTeamMemberDetails(@empId int,@rId int,@isActive int,@aeEmail nvarchar(150),@projectId int)
+as
+begin
+
+DECLARE @projId INT;
+ 
+    select @projId = ProjectId from ProjectAllocation where EmployeeId=@empId
+ 
+    SELECT @projId;
+ 
+    IF @projId > 0
+    BEGIN
+	--print 'in if block'
+        update ProjectAllocation set ProjectId=@projectId where EmployeeId = @empId
+    END
+    ELSE
+    BEGIN
+	--PRINT 'is null'
+        insert into ProjectAllocation values(@projectId,@empId)
+    END
+
+update Employee set RoleId=@rId,IsActive=@isActive,AEEmailId=@aeEmail where EmployeeId=@empId;
+
+
+end
+go
+
+
